@@ -5,49 +5,98 @@
   <title>Memória Especial 💖</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
       margin: 0; 
       font-family: Arial, sans-serif; 
       background: linear-gradient(120deg, #6ee7b7, #60a5fa); 
       color: #fff; 
       text-align: center;
+      /* Força o corpo a ter exatamente a altura da tela, sem rolar */
+      height: 100vh;
+      height: 100dvh; /* Suporte para barras de navegação mobile */
+      overflow: hidden;
     }
-    .container { max-width: 800px; margin: auto; padding: 20px; }
-    h1 { font-size: 1.5rem; margin: 8px 0; }
+
+    .container { 
+      max-width: 500px; 
+      height: 100%;
+      margin: auto; 
+      padding: 12px;
+      /* Organiza o conteúdo em coluna preenchendo o espaço */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h1 { 
+      font-size: 1.3rem; 
+      margin: 5px 0; 
+    }
+
+    /* Contador */
+    #contador {
+      background: rgba(0, 0, 0, 0.3);
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #24012b;
+      margin: 5px 0;
+    }
+
+    /* Carrossel de fotos adaptável */
     .carousel {
       position: relative;
       overflow: hidden;
       border-radius: 20px;
-      text-align: center;
+      width: 100%;
+      /* O carrossel vai crescer para usar o espaço disponível */
+      flex: 1; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 8px 0;
     }
-    .carousel img {
-      width: 65%;
-      display: none;    
-      margin: 0 auto;
-      border-radius: 20px;
-    }
-    .carousel img.active { display: block; }
-    .message {
-      margin-top: 20px; 
-      background: rgba(0,0,0,0.3); 
-      padding: 15px; 
-      border-radius: 12px;
-      font-size: 1.0rem;
-    }
-    audio { margin-top: 20px; width: 100%; }
-    .footer { margin-top: 10px; font-size: 1.2rem; opacity: 0.8; }
 
-    /* Contador */
-    #contador {
-      margin-top: 15px;
-      margin-bottom: 25px; /* <<< margem entre contador e carrossel */
-      background: rgba(0, 0, 0, 0.3);
-      display: inline-block;
-      padding: 10px;
+    .carousel img {
+      max-width: 85%;
+      /* Garante que a foto nunca passe do limite de altura do carrossel */
+      max-height: 100%; 
+      display: none;    
+      object-fit: contain;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .carousel img.active { display: block; }
+
+    /* Mensagem */
+    .message {
+      background: rgba(0,0,0,0.3); 
+      padding: 10px 15px; 
       border-radius: 12px;
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #24012b;
+      font-size: 0.9rem;
+      width: 100%;
+      margin: 5px 0;
+    }
+
+    /* Música */
+    audio { 
+      margin: 8px 0; 
+      width: 100%; 
+      height: 40px;
+    }
+
+    .footer { 
+      font-size: 0.9rem; 
+      opacity: 0.8; 
+      margin-top: 2px;
     }
   </style>
 </head>
@@ -55,10 +104,8 @@
   <div class="container">
     <h1>Para Sempre Nós Dois 💛</h1>
 
-    <!-- Contador de tempo juntos -->
     <div id="contador">Carregando...</div>
 
-    <!-- Carrossel de fotos -->
     <div class="carousel">
       <img src="foto1.jpg" class="active" alt="Foto 1">
       <img src="foto2.jpg" alt="Foto 2">
@@ -70,14 +117,12 @@
       <img src="foto8.jpg" alt="Foto 8">
     </div>
 
-    <!-- Mensagem -->
     <div class="message">
       Meu amor, cada momento ao seu lado é inesquecível.  
       Essa memória é só um pedacinho do quanto você é especial pra mim.  
       Te amoooo muitooo! 💖
     </div>
 
-    <!-- Música -->
     <audio controls autoplay loop>
       <source src="musica.mp3" type="audio/mpeg">
       Seu navegador não suporta áudio.
@@ -112,16 +157,34 @@
       let minutos = Math.floor(segundos / 60);
       let horas = Math.floor(minutos / 60);
       let dias = Math.floor(horas / 24);
-      let meses = Math.floor(dias / 30.44); // média de dias por mês
-      let anos = Math.floor(dias / 365);
+      
+      // Cálculo preciso de anos e meses restantes
+      let anos = agora.getFullYear() - inicio.getFullYear();
+      let meses = agora.getMonth() - inicio.getMonth();
+      let diasRestantes = agora.getDate() - inicio.getDate();
+
+      if (diasRestantes < 0) {
+        meses--;
+        // Pega o último dia do mês anterior
+        let ultimoDiaMesAnterior = new Date(agora.getFullYear(), agora.getMonth(), 0).getDate();
+        diasRestantes += ultimoDiaMesAnterior;
+      }
+
+      if (meses < 0) {
+        anos--;
+        meses += 12;
+      }
 
       segundos %= 60;
       minutos %= 60;
       horas %= 24;
-      dias = dias % 30.44; // resto de dias dentro do mês
 
+      // Formatação de texto condicional para economizar espaço na tela mobile
+      let textoAnos = anos > 0 ? `${anos}a ` : "";
+      let textoMeses = meses > 0 ? `${meses}m ` : "";
+      
       document.getElementById("contador").innerText =
-        `${anos} anos ${meses} meses ${Math.floor(dias)} dias ${horas} horas ${minutos} minutos ${segundos} segundos`;
+        `${textoAnos}${textoMeses}${diasRestantes}d ${horas}h ${minutos}m ${segundos}s`;
     }
 
     atualizarContador();
